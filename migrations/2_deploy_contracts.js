@@ -1,5 +1,7 @@
-var SimpleStorage = artifacts.require("./SimpleStorage.sol");
+var Marketplace = artifacts.require("./Marketplace.sol");
 
-module.exports = function(deployer) {
-  deployer.deploy(SimpleStorage);
+module.exports = function(deployer, network, accounts) {
+  const admins = [accounts[0], accounts[1]];
+
+  deployer.deploy(Marketplace, admins);
 };
