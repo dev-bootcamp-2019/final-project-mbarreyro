@@ -39,8 +39,14 @@ contract("Marketplace", accounts => {
     // Get recently added storefront
     const storefront1 = await marketplaceInstance.getStorefront.call(1, { from: accounts[2] });
     const storefront2 = await marketplaceInstance.getStorefront.call(2, { from: accounts[2] });
+    const ids = await marketplaceInstance.getStorefrontsIds.call({ from: accounts[2] });
+
     assert.equal(storefront1.id, 1, "Store 1 should have id = 1");
+    assert.equal(storefront1.name, 'My store 1', "Store 1 be named My store 1");
     assert.equal(storefront2.id, 2, "Store 2 should have id = 2");
+    assert.equal(storefront2.name, 'My store 2', "Store 2 be named My store 2");
+    assert.equal(ids[0], 1, "Ids returned index 0 should be 1");
+    assert.equal(ids[1], 2, "Ids returned index 1 should be 2");
   });
 
   it("...active owner cannot access another owners storefront", async () => {
