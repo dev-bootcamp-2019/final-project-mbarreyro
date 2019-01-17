@@ -13,7 +13,7 @@ contract("Marketplace", accounts => {
     assert.equal(storeOwner.active, true, "Store owner should be active");
   });
 
-  it("... not admin should not be able to add an store owner", async () => {
+  it("...not admin should not be able to add an store owner", async () => {
     const marketplaceInstance = await Marketplace.deployed();
 
     try {
@@ -63,12 +63,45 @@ contract("Marketplace", accounts => {
     assert.equal(storefront3.id, 3, "Store owner 3 should be able to access store 3");
 
     let storefront3by2;
+    let failed = false;
     try {
         storefront3by2 = await marketplaceInstance.getStorefront.call(3, { from: accounts[2] });
     } catch (e) {
-      // fail silently
+      failed = true;
     }
 
     assert.equal(storefront3by2, undefined, "Store front should be undefined");
+    assert.equal(failed, true, "Call should fail");
+  });
+
+  it("...active owner can add new product to storefront", async () => {
+    const marketplaceInstance = await Marketplace.deployed();
+
+    await marketplaceInstance.addProduct(3, 'Cuchillo', 10, 100, { from: accounts[3] });
+
+    const product = await marketplaceInstance.getProduct.call(1, { from: accounts[3] });
+    const storefront = await marketplaceInstance.getStorefront.call(3, { from: accounts[3] });
+
+    assert.equal(product.sku, 1, 'First product sku should be 1');
+    assert.equal(product.name, 'Cuchillo', 'First product name should be Cuchillo');
+    assert.equal(storefront.skus.length, 1, 'Storefront should have one product');
+  });
+
+  it("...active owner can add and remove new product to storefront", async () => {
+    const marketplaceInstance = await Marketplace.deployed();
+
+    await marketplaceInstance.addProduct(3, 'Plato', 15, 105, { from: accounts[3] });
+
+    const product = await marketplaceInstance.getProduct.call(2, { from: accounts[3] });
+    const storefront = await marketplaceInstance.getStorefront.call(3, { from: accounts[3] });
+
+    assert.equal(product.sku, 2, 'First product sku should be 1');
+    assert.equal(product.name, 'Plato', 'Second product name should be Plato');
+    assert.equal(storefront.skus.length, 2, 'Storefront should have two products');
+
+    await marketplaceInstance.deleteProduct(2, { from: accounts[3] });
+    //
+    const storefrontAfterDelete = await marketplaceInstance.getStorefront.call(3, { from: accounts[3] });
+    assert.equal(storefrontAfterDelete.skus.length, 1, 'Storefront should have one product');
   });
 });
