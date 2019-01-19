@@ -5,19 +5,16 @@ contract Marketplace {
   address[] private admins;
 
   mapping (address => bool) public isAdmin;
-  mapping (address => StoreOwner) public storeOwners;
+  mapping (address => bool) public storeOwners;
+  mapping (address => uint[]) public ownerStorefrontIds;
+
+  mapping (address => uint) private balances;
 
   uint private storefrontsCount;
   mapping (uint => Storefront) private storefronts;
 
   uint private skuCount;
   mapping (uint => Product) private products;
-
-  struct StoreOwner {
-      bool active;
-      uint balance;
-      uint[] storefrontsIds;
-  }
 
   struct Storefront {
       uint id;
@@ -51,19 +48,19 @@ contract Marketplace {
   }
 
   modifier onlyActiveOwner() {
-      require(storeOwners[msg.sender].active);
+      require(storeOwners[msg.sender]);
       _;
   }
 
   function addStoreOwner(address storeOwner) public onlyAdmin {
-      require(!storeOwners[storeOwner].active);
+      require(!storeOwners[storeOwner]);
 
-      storeOwners[storeOwner].active = true;
+      storeOwners[storeOwner] = true;
   }
 
   function addStorefront(string memory name) public onlyActiveOwner returns (uint) {
       storefrontsCount++;
-      storeOwners[msg.sender].storefrontsIds.push(storefrontsCount);
+      ownerStorefrontIds[msg.sender].push(storefrontsCount);
       storefronts[storefrontsCount].id = storefrontsCount;
       storefronts[storefrontsCount].name = name;
       storefronts[storefrontsCount].storeOwner = msg.sender;
@@ -79,12 +76,14 @@ contract Marketplace {
       skus = storefronts[_id].skus;
   }
 
-  function getStorefrontsIds() public view onlyActiveOwner returns (uint[] memory) {
-      return storeOwners[msg.sender].storefrontsIds;
+  function getStorefrontCount(address storeOwner) public view returns (uint) {
+      return ownerStorefrontIds[storeOwner].length;
   }
 
   function addProduct(uint _storefrontId, string memory name, uint count, uint price) public onlyActiveOwner returns (uint) {
       require(storefronts[_storefrontId].storeOwner == msg.sender);
+      require(price > 0);
+
       skuCount++;
 
       products[skuCount].storefrontId = _storefrontId;
@@ -107,7 +106,7 @@ contract Marketplace {
       storefrontId = products[_sku].storefrontId;
   }
 
-  function deleteProduct(uint _sku) public onlyActiveOwner returns (bool) {
+  function deleteProduct(uint _sku) public onlyActiveOwner {
       require(storefronts[products[_sku].storefrontId].storeOwner == msg.sender);
 
       uint storefrontId = products[_sku].storefrontId;
@@ -124,7 +123,33 @@ contract Marketplace {
 
       delete products[_sku];
       storefronts[storefrontId].skus.length--;
+  }
 
-      return true;
+  function buyProduct(uint _sku, uint quantity) public payable {
+      require(quantity > 0);
+      require(products[_sku].count >= quantity);
+      require(products[_sku].price * quantity <= msg.value);
+
+      Product memory product = products[_sku];
+      Storefront memory storefront = storefronts[product.storefrontId];
+
+      balances[storefront.storeOwner] += products[_sku].price * quantity;
+      products[_sku].count -= quantity;
+
+      uint toRefund = msg.value - products[_sku].price * quantity;
+      if (toRefund > 0) {
+        msg.sender.transfer(toRefund);
+      }
+  }
+
+  function balance() public view onlyActiveOwner returns(uint) {
+      return balances[msg.sender];
+  }
+
+  function withdraw() public onlyActiveOwner {
+      uint amount = balances[msg.sender];
+
+      balances[msg.sender] = 0;
+      msg.sender.transfer(amount);
   }
 }
