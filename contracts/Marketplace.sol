@@ -53,7 +53,7 @@ contract Marketplace {
   }
 
   function addStoreOwner(address storeOwner) public onlyAdmin {
-      require(!storeOwners[storeOwner]);
+      require(!storeOwners[storeOwner], 'Owner already exists');
 
       storeOwners[storeOwner] = true;
   }
