@@ -88,6 +88,18 @@ class App extends Component {
       .send({from: accounts[0]});
   }
 
+  fetchProduct = async (sku) => {
+    const { accounts, contract } = this.state;
+
+    return contract.methods.getProduct(sku).call({from: accounts[0]});
+  }
+
+  deleteProduct = async (sku) => {
+    const { accounts, contract } = this.state;
+
+    return contract.methods.deleteProduct(sku).send({from: accounts[0]});
+  }
+
   render() {
     if (!this.state.web3) {
       return <div>Loading Web3, accounts, and contract...</div>;
@@ -100,6 +112,8 @@ class App extends Component {
             fetchOwnerStorefronts={this.fetchOwnerStorefronts}
             addNewStorefront={this.addNewStorefront}
             addProduct={this.addProduct}
+            fetchProduct={this.fetchProduct}
+            deleteProduct={this.deleteProduct}
           />
         }
         {!this.state.isAdmin && !this.state.isOwner && <h1>Welcome to this Marketplace</h1>}

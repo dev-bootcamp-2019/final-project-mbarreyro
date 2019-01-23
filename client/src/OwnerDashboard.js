@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import AddProduct from './AddProduct';
+import StorefrontProduct from './StorefrontProduct';
 
 class OwnerDashboard extends Component {
   constructor(props) {
@@ -9,7 +10,10 @@ class OwnerDashboard extends Component {
       status: '',
       newStorefrontName: '',
       sentStorefrontName: '',
+      currentStorefrontId: null,
+      currentStorefrontName: null,
       currentStorefrontIndex: null,
+      currentStorefrontSkus: null,
       storefronts: [],
       disabledProductAdd: false
     };
@@ -89,6 +93,7 @@ class OwnerDashboard extends Component {
     this.setState({
       currentStorefrontId: this.state.storefronts[storeIndex].id,
       currentStorefrontName: this.state.storefronts[storeIndex].name,
+      currentStorefrontSkus: this.state.storefronts[storeIndex].skus,
       currentStorefrontIndex: storeIndex
     });
   }
@@ -119,6 +124,34 @@ class OwnerDashboard extends Component {
     this.setState({
       status: `An error occurred while adding product "${this.state.sentNewProductName}"`,
       disabledProductAdd: false,
+      lastReceipt: receipt.toString()
+    });
+
+    console.log(receipt);
+  }
+
+  deleteProduct(sku) {
+    this.setState({
+      status: `Attempting to delete ${sku} product`,
+    });
+
+    this.props.deleteProduct(sku)
+      .then(this.onDeleteProductSuccess.bind(this))
+      .catch(this.onDeleteProductError.bind(this));
+  }
+
+  onDeleteProductSuccess(receipt) {
+    this.setState({
+      status: 'Product deleted successfully',
+      lastReceipt: receipt.toString()
+    });
+
+    console.log(receipt);
+  }
+
+  onDeleteProductError(receipt) {
+    this.setState({
+      status: 'An error occurred when trying to delete product',
       lastReceipt: receipt.toString()
     });
 
@@ -159,6 +192,16 @@ class OwnerDashboard extends Component {
               />
             </div>
           </div>
+        }
+        {this.state.currentStorefrontSkus !== null && this.state.currentStorefrontSkus !== null &&
+          this.state.currentStorefrontSkus.map((sku, i) => (
+              <StorefrontProduct
+                key={i}
+                sku={sku}
+                fetchProduct={this.props.fetchProduct}
+                deleteProduct={this.deleteProduct.bind(this)}
+              />
+          ))
         }
         <pre>
           {this.state.lastReceipt}
