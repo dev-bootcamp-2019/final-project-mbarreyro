@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import Marketplace from "./contracts/Marketplace.json";
 import AdminDashboard from "./AdminDashboard";
+import OwnerDashboard from "./OwnerDashboard";
 import getWeb3 from "./utils/getWeb3";
 
 import "./App.css";
@@ -50,17 +51,43 @@ class App extends Component {
     return contract.methods.addStoreOwner(address).send({from: accounts[0]});
   }
 
+  addNewStorefront = async newStorefrontName => {
+    const { accounts, contract } = this.state;
+
+    return contract.methods.addStorefront(newStorefrontName).send({from: accounts[0]});
+  }
+
+  fetchOwnerStorefronts = async () => {
+    const { accounts, contract } = this.state;
+
+    const storeCount = await contract.methods.getStorefrontCount(accounts[0]).call();
+
+    if (storeCount === 0) {
+      return [];
+    }
+
+    let ids = [];
+    for (let i = 0; i < storeCount; i++) {
+      ids.push(await contract.methods.ownerStorefrontIds(accounts[0], i).call());
+    }
+
+    let storefronts = [];
+    for (let j = 0; j < ids.length; j++) {
+      storefronts.push(await contract.methods.getStorefront(ids[j]).call({from: accounts[0]}));
+    }
+
+    return storefronts;
+  }
+
   render() {
     if (!this.state.web3) {
       return <div>Loading Web3, accounts, and contract...</div>;
     }
     return (
       <div className="App">
-        <h1>Welcome to this Marketplace</h1>
-
         {this.state.isAdmin && <AdminDashboard addNewStoreOwner={this.addNewStoreOwner} />}
-        {this.state.isOwner && <h3>You are an Owner!</h3>}
-        {!this.state.isAdmin && !this.state.isOwner && <h3>You are a customer!</h3>}
+        {this.state.isOwner && <OwnerDashboard fetchOwnerStorefronts={this.fetchOwnerStorefronts} addNewStorefront={this.addNewStorefront}/>}
+        {!this.state.isAdmin && !this.state.isOwner && <h1>Welcome to this Marketplace</h1>}
       </div>
     );
   }
