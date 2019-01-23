@@ -35,6 +35,16 @@ class OwnerDashboard extends Component {
       storefronts
     });
 
+    if (this.state.currentStorefrontIndex !== null) {
+      let storefront = this.state.storefronts[this.state.currentStorefrontIndex];
+
+      this.setState({
+        currentStorefrontId: storefront.id,
+        currentStorefrontName: storefront.name,
+        currentStorefrontSkus: storefront.skus
+      })
+    }
+
     console.log(storefronts);
   }
 
@@ -45,6 +55,13 @@ class OwnerDashboard extends Component {
     });
 
     console.log(arguments);
+  }
+
+  onFetchStorefrontSuccess(storefront) {
+    this.setState({
+      status: `Fetching store ${this.state.currentStorefrontName} data...`
+
+    });
   }
 
   handleAddStorefrontInputChange(value) {
@@ -118,6 +135,10 @@ class OwnerDashboard extends Component {
     });
 
     callback();
+
+    this.props.fetchOwnerStorefronts()
+      .then(this.onFetchSuccess.bind(this))
+      .catch(this.onFetchError.bind(this));
   }
 
   onAddProductError(receipt) {
@@ -147,6 +168,10 @@ class OwnerDashboard extends Component {
     });
 
     console.log(receipt);
+
+    this.props.fetchOwnerStorefronts()
+      .then(this.onFetchSuccess.bind(this))
+      .catch(this.onFetchError.bind(this));
   }
 
   onDeleteProductError(receipt) {
