@@ -73,10 +73,19 @@ class App extends Component {
 
     let storefronts = [];
     for (let j = 0; j < ids.length; j++) {
-      storefronts.push(await contract.methods.getStorefront(ids[j]).call({from: accounts[0]}));
+      storefronts.push(contract.methods.getStorefront(ids[j]).call({from: accounts[0]}));
     }
 
-    return storefronts;
+    return Promise.all(storefronts);
+  }
+
+  addProduct = async (storeId, name, price, count) => {
+    const { accounts, contract } = this.state;
+
+    return contract
+      .methods
+      .addProduct(storeId, name, count, price)
+      .send({from: accounts[0]});
   }
 
   render() {
@@ -86,7 +95,13 @@ class App extends Component {
     return (
       <div className="App">
         {this.state.isAdmin && <AdminDashboard addNewStoreOwner={this.addNewStoreOwner} />}
-        {this.state.isOwner && <OwnerDashboard fetchOwnerStorefronts={this.fetchOwnerStorefronts} addNewStorefront={this.addNewStorefront}/>}
+        {this.state.isOwner &&
+          <OwnerDashboard
+            fetchOwnerStorefronts={this.fetchOwnerStorefronts}
+            addNewStorefront={this.addNewStorefront}
+            addProduct={this.addProduct}
+          />
+        }
         {!this.state.isAdmin && !this.state.isOwner && <h1>Welcome to this Marketplace</h1>}
       </div>
     );

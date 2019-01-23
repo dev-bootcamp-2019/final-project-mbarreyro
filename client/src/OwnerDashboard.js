@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import AddProduct from './AddProduct';
 
 class OwnerDashboard extends Component {
   constructor(props) {
@@ -8,7 +9,9 @@ class OwnerDashboard extends Component {
       status: '',
       newStorefrontName: '',
       sentStorefrontName: '',
-      storefronts: []
+      currentStorefrontIndex: null,
+      storefronts: [],
+      disabledProductAdd: false
     };
   }
 
@@ -82,6 +85,46 @@ class OwnerDashboard extends Component {
     console.log(receipt);
   }
 
+  onManageClick(storeIndex) {
+    this.setState({
+      currentStorefrontId: this.state.storefronts[storeIndex].id,
+      currentStorefrontName: this.state.storefronts[storeIndex].name,
+      currentStorefrontIndex: storeIndex
+    });
+  }
+
+  addProduct(name, count, price, callback) {
+    this.setState({
+      status: `Adding new product "${name}" ...`,
+      sentNewProductName: name,
+      disabledProductAdd: true
+    });
+
+    this.props.addProduct(this.state.currentStorefrontId, name, count, price)
+      .then(this.onAddProductSuccess.bind(this, callback))
+      .catch(this.onAddProductError.bind(this));
+  }
+
+  onAddProductSuccess(callback, receipt) {
+    this.setState({
+      status: `New product "${this.state.sentNewProductName}" added`,
+      disabledProductAdd: false,
+      lastReceipt: receipt.toString()
+    });
+
+    callback();
+  }
+
+  onAddProductError(receipt) {
+    this.setState({
+      status: `An error occurred while adding product "${this.state.sentNewProductName}"`,
+      disabledProductAdd: false,
+      lastReceipt: receipt.toString()
+    });
+
+    console.log(receipt);
+  }
+
   render() {
     return (
       <div>
@@ -92,7 +135,7 @@ class OwnerDashboard extends Component {
             <h2>Storefronts</h2>
             <ul>
               {this.state.storefronts.map((s, i) => (
-                <li key={i}>{s.name}</li>
+                <li key={i}>{s.name}({s.id})<button onClick={() => this.onManageClick(i)}>Manage</button></li>
               ))}
             </ul>
           </div>
@@ -105,6 +148,18 @@ class OwnerDashboard extends Component {
             <button disabled={this.state.disabled} onClick={() => this.handleAddClick()} >Add</button>
           </label>
         </div>
+        {this.state.currentStorefrontIndex !== null &&
+          <div>
+            <h2>Managing Storefront # {this.state.currentStorefrontId} {this.state.currentStorefrontName}</h2>
+            <div>
+              <AddProduct
+                disabled={this.state.disabledProductAdd}
+                storeId={this.state.currentStorefrontId}
+                addProduct={this.addProduct.bind(this)}
+              />
+            </div>
+          </div>
+        }
         <pre>
           {this.state.lastReceipt}
         </pre>
