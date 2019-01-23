@@ -183,6 +183,70 @@ class OwnerDashboard extends Component {
     console.log(receipt);
   }
 
+  updateProductPrice(sku, price) {
+    this.setState({
+      status: 'Updating product price...'
+    });
+
+    this.props.updateProductPrice(sku, price)
+      .then(this.updateProductPriceSuccess.bind(this))
+      .catch(this.updateProductPriceError.bind(this));
+  }
+
+  updateProductPriceSuccess(receipt) {
+    this.setState({
+      status: 'Product price updated successfully',
+      lastReceipt: receipt.toString()
+    });
+
+    console.log(receipt);
+
+    this.props.fetchOwnerStorefronts()
+      .then(this.onFetchSuccess.bind(this))
+      .catch(this.onFetchError.bind(this));
+  }
+
+  updateProductPriceError(receipt) {
+    this.setState({
+      status: 'An error occurred when trying to update product',
+      lastReceipt: receipt.toString()
+    });
+
+    console.log(receipt);
+  }
+
+  updateProductCount(sku, count) {
+    this.setState({
+      status: 'Updating product count...'
+    });
+
+    this.props.updateProductCount(sku, count)
+      .then(this.updateProductCountSuccess.bind(this))
+      .catch(this.updateProductCountError.bind(this));
+  }
+
+  updateProductCountSuccess(receipt) {
+    this.setState({
+      status: 'Product count updated successfully',
+      lastReceipt: receipt.toString()
+    });
+
+    console.log(receipt);
+
+    this.props.fetchOwnerStorefronts()
+      .then(this.onFetchSuccess.bind(this))
+      .catch(this.onFetchError.bind(this));
+  }
+
+  updateProductCountError(receipt) {
+    this.setState({
+      status: 'An error occurred when trying to update product',
+      lastReceipt: receipt.toString()
+    });
+
+    console.log(receipt);
+  }
+
   render() {
     return (
       <div>
@@ -225,6 +289,8 @@ class OwnerDashboard extends Component {
                 sku={sku}
                 fetchProduct={this.props.fetchProduct}
                 deleteProduct={this.deleteProduct.bind(this)}
+                updateProductPrice={this.updateProductPrice.bind(this)}
+                updateProductCount={this.updateProductCount.bind(this)}
               />
           ))
         }

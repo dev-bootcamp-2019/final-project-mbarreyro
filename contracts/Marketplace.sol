@@ -125,6 +125,18 @@ contract Marketplace {
       storefronts[storefrontId].skus.length--;
   }
 
+  function updateProductPrice(uint _sku, uint price) public onlyActiveOwner {
+      require(storefronts[products[_sku].storefrontId].storeOwner == msg.sender);
+
+      products[_sku].price = price;
+  }
+
+  function updateProductCount(uint _sku, uint count) public onlyActiveOwner {
+      require(storefronts[products[_sku].storefrontId].storeOwner == msg.sender);
+
+      products[_sku].count = count;
+  }
+
   function buyProduct(uint _sku, uint quantity) public payable {
       require(quantity > 0);
       require(products[_sku].count >= quantity);

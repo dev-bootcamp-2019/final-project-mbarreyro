@@ -88,16 +88,28 @@ class App extends Component {
       .send({from: accounts[0]});
   }
 
-  fetchProduct = async (sku) => {
+  fetchProduct = async sku => {
     const { accounts, contract } = this.state;
 
     return contract.methods.getProduct(sku).call({from: accounts[0]});
   }
 
-  deleteProduct = async (sku) => {
+  deleteProduct = async sku => {
     const { accounts, contract } = this.state;
 
     return contract.methods.deleteProduct(sku).send({from: accounts[0]});
+  }
+
+  updateProductPrice = async (sku, price) => {
+    const { accounts, contract } = this.state;
+
+    return contract.methods.updateProductPrice(sku, price).send({from: accounts[0]});
+  }
+
+  updateProductCount = async (sku, price) => {
+    const { accounts, contract } = this.state;
+
+    return contract.methods.updateProductCount(sku, price).send({from: accounts[0]});
   }
 
   render() {
@@ -114,6 +126,8 @@ class App extends Component {
             addProduct={this.addProduct}
             fetchProduct={this.fetchProduct}
             deleteProduct={this.deleteProduct}
+            updateProductPrice={this.updateProductPrice}
+            updateProductCount={this.updateProductCount}
           />
         }
         {!this.state.isAdmin && !this.state.isOwner && <h1>Welcome to this Marketplace</h1>}
