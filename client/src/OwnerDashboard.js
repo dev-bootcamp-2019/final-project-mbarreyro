@@ -22,66 +22,35 @@ class OwnerDashboard extends Component {
 
   componentDidMount() {
     this.setState({
-      status: 'Fetching storefronts...'
+      status: 'Fetching owner data...'
     });
 
-    this.props.fetchOwnerStorefronts()
-      .then(this.onFetchSuccess.bind(this))
-      .catch(this.onFetchError.bind(this));
-
-    this.props.fetchOwnerBalance()
-      .then(this.onBalanceSuccess.bind(this))
-      .catch(this.onBalanceError.bind(this));;
+    this.fetchOwnerData();
   }
 
-  onFetchSuccess(storefronts) {
-    this.setState({
-      status: `Found ${storefronts.length} storefronts`,
-      storefronts
-    });
+  async fetchOwnerData() {
+    let storefronts, balance;
+
+    storefronts = await this.props.fetchOwnerStorefronts();
+    balance = await this.props.fetchOwnerBalance();
+
+    let updates = {
+        status: `Found ${storefronts.length} storefronts.`,
+        balance,
+        storefronts
+    };
 
     if (this.state.currentStorefrontIndex !== null) {
-      let storefront = this.state.storefronts[this.state.currentStorefrontIndex];
+      let storefront = storefronts[this.state.currentStorefrontIndex];
 
-      this.setState({
+      updates = Object.assign(updates, {
         currentStorefrontId: storefront.id,
         currentStorefrontName: storefront.name,
         currentStorefrontSkus: storefront.skus
-      })
+      });
     }
 
-    console.log(storefronts);
-  }
-
-  onFetchError(error) {
-    this.setState({
-      status: 'Failed to fetch storefronts',
-      lastReceipt: error
-    });
-
-    console.log(arguments);
-  }
-
-  onBalanceSuccess(balance) {
-    this.setState({
-        balance
-    });
-  }
-
-  onBalanceError(receipt) {
-    this.setState({
-      status: 'An error occurred while trying to get your balance',
-      lastReceipt: receipt.toString()
-    });
-
-    console.log(receipt);
-  }
-
-  onFetchStorefrontSuccess(storefront) {
-    this.setState({
-      status: `Fetching store ${this.state.currentStorefrontName} data...`
-
-    });
+    this.setState(updates);
   }
 
   handleAddStorefrontInputChange(value) {
@@ -111,9 +80,7 @@ class OwnerDashboard extends Component {
     });
 
     console.log(receipt);
-    this.props.fetchOwnerStorefronts()
-      .then(this.onFetchSuccess.bind(this))
-      .catch(this.onFetchError.bind(this));
+    this.fetchOwnerData();
   }
 
   onAddError(receipt) {
@@ -156,9 +123,7 @@ class OwnerDashboard extends Component {
 
     callback();
 
-    this.props.fetchOwnerStorefronts()
-      .then(this.onFetchSuccess.bind(this))
-      .catch(this.onFetchError.bind(this));
+    this.fetchOwnerData();
   }
 
   onAddProductError(receipt) {
@@ -189,9 +154,7 @@ class OwnerDashboard extends Component {
 
     console.log(receipt);
 
-    this.props.fetchOwnerStorefronts()
-      .then(this.onFetchSuccess.bind(this))
-      .catch(this.onFetchError.bind(this));
+    this.fetchOwnerData();
   }
 
   onDeleteProductError(receipt) {
@@ -221,9 +184,7 @@ class OwnerDashboard extends Component {
 
     console.log(receipt);
 
-    this.props.fetchOwnerStorefronts()
-      .then(this.onFetchSuccess.bind(this))
-      .catch(this.onFetchError.bind(this));
+    this.fetchOwnerData();
   }
 
   updateProductPriceError(receipt) {
@@ -253,9 +214,7 @@ class OwnerDashboard extends Component {
 
     console.log(receipt);
 
-    this.props.fetchOwnerStorefronts()
-      .then(this.onFetchSuccess.bind(this))
-      .catch(this.onFetchError.bind(this));
+    this.fetchOwnerData();
   }
 
   updateProductCountError(receipt) {
@@ -309,7 +268,7 @@ class OwnerDashboard extends Component {
         {this.state.currentStorefrontSkus !== null && this.state.currentStorefrontSkus !== null &&
           this.state.currentStorefrontSkus.map((sku, i) => (
               <StorefrontProduct
-                key={i}
+                key={sku}
                 sku={sku}
                 fetchProduct={this.props.fetchProduct}
                 deleteProduct={this.deleteProduct.bind(this)}
