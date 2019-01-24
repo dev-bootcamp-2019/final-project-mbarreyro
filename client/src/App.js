@@ -57,6 +57,12 @@ class App extends Component {
     return contract.methods.addStorefront(newStorefrontName).send({from: accounts[0]});
   }
 
+  fetchOwnerBalance = async () => {
+    const { accounts, contract } = this.state;
+
+    return contract.methods.balance().call({from: accounts[0]});
+  }
+
   fetchOwnerStorefronts = async () => {
     const { accounts, contract } = this.state;
 
@@ -122,6 +128,7 @@ class App extends Component {
         {this.state.isOwner &&
           <OwnerDashboard
             fetchOwnerStorefronts={this.fetchOwnerStorefronts}
+            fetchOwnerBalance={this.fetchOwnerBalance}
             addNewStorefront={this.addNewStorefront}
             addProduct={this.addProduct}
             fetchProduct={this.fetchProduct}

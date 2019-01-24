@@ -8,6 +8,7 @@ class OwnerDashboard extends Component {
     this.state = {
       disabled: false,
       status: '',
+      balance: 0,
       newStorefrontName: '',
       sentStorefrontName: '',
       currentStorefrontId: null,
@@ -27,6 +28,10 @@ class OwnerDashboard extends Component {
     this.props.fetchOwnerStorefronts()
       .then(this.onFetchSuccess.bind(this))
       .catch(this.onFetchError.bind(this));
+
+    this.props.fetchOwnerBalance()
+      .then(this.onBalanceSuccess.bind(this))
+      .catch(this.onBalanceError.bind(this));;
   }
 
   onFetchSuccess(storefronts) {
@@ -55,6 +60,21 @@ class OwnerDashboard extends Component {
     });
 
     console.log(arguments);
+  }
+
+  onBalanceSuccess(balance) {
+    this.setState({
+        balance
+    });
+  }
+
+  onBalanceError(receipt) {
+    this.setState({
+      status: 'An error occurred while trying to get your balance',
+      lastReceipt: receipt.toString()
+    });
+
+    console.log(receipt);
   }
 
   onFetchStorefrontSuccess(storefront) {
@@ -252,6 +272,10 @@ class OwnerDashboard extends Component {
       <div>
         <h1>Welcome to your storefronts dashboard</h1>
         <p><i>{this.state.status}</i></p>
+        <div>
+          <h2>Your balance is: {this.state.balance}</h2>
+          <button>Withdraw</button>
+        </div>
         {this.state.storefronts.length > 0 &&
           <div>
             <h2>Storefronts</h2>
