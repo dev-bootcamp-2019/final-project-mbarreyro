@@ -52,7 +52,6 @@ class StorefrontProduct extends Component {
   render () {
     return (
       <div style={{margin: '20px'}}>
-
         <fieldset>
           <legend># {this.state.sku} {this.state.name}</legend>
           Price: <input type='number' value={this.state.price} onChange={e => this.handlePriceChange(e.target.value)} />

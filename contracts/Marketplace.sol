@@ -68,16 +68,18 @@ contract Marketplace {
       return storefrontsCount;
   }
 
-  function getStorefront(uint _id) public view onlyActiveOwner returns (uint id, string memory name, uint[] memory skus) {
-      require(storefronts[_id].storeOwner == msg.sender);
-
+  function getStorefront(uint _id) public view returns (uint id, string memory name, uint[] memory skus) {
       id = storefronts[_id].id;
       name = storefronts[_id].name;
       skus = storefronts[_id].skus;
   }
 
-  function getStorefrontCount(address storeOwner) public view returns (uint) {
+  function getOwnerStorefrontCount(address storeOwner) public view returns (uint) {
       return ownerStorefrontIds[storeOwner].length;
+  }
+
+  function getStorefrontCount() public view returns (uint) {
+      return storefrontsCount;
   }
 
   function addProduct(uint _storefrontId, string memory name, uint count, uint price) public onlyActiveOwner returns (uint) {
@@ -96,9 +98,7 @@ contract Marketplace {
       return skuCount;
   }
 
-  function getProduct(uint _sku) public view onlyActiveOwner returns (uint sku, string memory name, uint price, uint count, uint storefrontId) {
-      require(storefronts[products[_sku].storefrontId].storeOwner == msg.sender);
-
+  function getProduct(uint _sku) public view returns (uint sku, string memory name, uint price, uint count, uint storefrontId) {
       sku = products[_sku].sku;
       name = products[_sku].name;
       price = products[_sku].price;

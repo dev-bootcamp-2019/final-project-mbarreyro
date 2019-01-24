@@ -226,14 +226,25 @@ class OwnerDashboard extends Component {
     console.log(receipt);
   }
 
+  handleWithdrawClick() {
+    this.props.withdraw()
+      .then(this.fetchOwnerData.bind(this))
+      .catch((receipt) => console.log(receipt));
+  }
+
   render() {
     return (
       <div>
         <h1>Welcome to your storefronts dashboard</h1>
         <p><i>{this.state.status}</i></p>
         <div>
-          <h2>Your balance is: {this.state.balance}</h2>
-          <button>Withdraw</button>
+          <h2>
+            Your balance is:
+            {this.state.balance !== null &&
+              <span>${this.props.web3.utils.fromWei(this.state.balance.toString())}eth</span>
+            }
+          </h2>
+          <button onClick={() => this.handleWithdrawClick()}>Withdraw</button>
         </div>
         {this.state.storefronts.length > 0 &&
           <div>
@@ -249,7 +260,7 @@ class OwnerDashboard extends Component {
           <label>
             Add new storefront:
             <input type='string' onChange={e => this.handleAddStorefrontInputChange(e.target.value)}/>
-            <button disabled={this.state.disabled} onClick={() => this.handleAddClick()} >Add</button>
+            <button disabled={this.state.disabled} value={this.newStorefrontName} onClick={() => this.handleAddClick()}>Add</button>
           </label>
         </div>
         {this.state.currentStorefrontIndex !== null &&

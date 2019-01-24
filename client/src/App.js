@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 import Marketplace from "./contracts/Marketplace.json";
+import PublicMarketplace from './PublicMarketplace';
 import AdminDashboard from "./AdminDashboard";
 import OwnerDashboard from "./OwnerDashboard";
 import getWeb3 from "./utils/getWeb3";
@@ -66,7 +67,7 @@ class App extends Component {
   fetchOwnerStorefronts = async () => {
     const { accounts, contract } = this.state;
 
-    const storeCount = await contract.methods.getStorefrontCount(accounts[0]).call();
+    const storeCount = await contract.methods.getOwnerStorefrontCount(accounts[0]).call();
 
     if (storeCount === 0) {
       return [];
@@ -79,7 +80,24 @@ class App extends Component {
 
     let storefronts = [];
     for (let j = 0; j < ids.length; j++) {
-      storefronts.push(contract.methods.getStorefront(ids[j]).call({from: accounts[0]}));
+      storefronts.push(contract.methods.getStorefront(ids[j]).call());
+    }
+
+    return Promise.all(storefronts);
+  }
+
+  fetchMarketplaceStorefronts = async () => {
+    const { contract } = this.state;
+
+    const storeCount = await contract.methods.getStorefrontCount().call();
+
+    if (storeCount === 0) {
+      return [];
+    }
+
+    let storefronts = [];
+    for (let i = 1; i <= storeCount; i++) {
+      storefronts.push(contract.methods.getStorefront(i).call());
     }
 
     return Promise.all(storefronts);
@@ -107,15 +125,27 @@ class App extends Component {
   }
 
   updateProductPrice = async (sku, price) => {
-    const { accounts, contract } = this.state;
+    const { accounts, contract, web3 } = this.state;
 
-    return contract.methods.updateProductPrice(sku, price).send({from: accounts[0]});
+    return contract.methods.updateProductPrice(sku, web3.utils.toWei(price)).send({from: accounts[0]});
   }
 
   updateProductCount = async (sku, price) => {
     const { accounts, contract } = this.state;
 
     return contract.methods.updateProductCount(sku, price).send({from: accounts[0]});
+  }
+
+  buyProduct = async (sku, price) => {
+    const { accounts, contract } = this.state;
+
+    return contract.methods.buyProduct(sku, 1).send({from: accounts[0], value: price});
+  }
+
+  withdraw = async() => {
+    const { accounts, contract } = this.state;
+
+    return contract.methods.withdraw().send({from: accounts[0]});
   }
 
   render() {
@@ -135,9 +165,18 @@ class App extends Component {
             deleteProduct={this.deleteProduct}
             updateProductPrice={this.updateProductPrice}
             updateProductCount={this.updateProductCount}
+            withdraw={this.withdraw}
+            web3={this.state.web3}
           />
         }
-        {!this.state.isAdmin && !this.state.isOwner && <h1>Welcome to this Marketplace</h1>}
+        {!this.state.isAdmin && !this.state.isOwner &&
+          <PublicMarketplace
+            fetchMarketplaceStorefronts={this.fetchMarketplaceStorefronts}
+            fetchProduct={this.fetchProduct}
+            buyProduct={this.buyProduct}
+            web3={this.state.web3}
+          />
+        }
       </div>
     );
   }
