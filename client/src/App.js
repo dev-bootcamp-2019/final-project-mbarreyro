@@ -8,7 +8,7 @@ import getWeb3 from "./utils/getWeb3";
 import "./App.css";
 
 class App extends Component {
-  state = { web3: null, accounts: null, contract: null, isAdmin: false, isOwner: false };
+  state = { web3: null, accounts: null, contract: null, isAdmin: null, isOwner: null };
 
   componentDidMount = async () => {
     try {
@@ -40,6 +40,7 @@ class App extends Component {
 
   initState = async () => {
     const { accounts, contract } = this.state;
+
     const isAdmin = await contract.methods.isAdmin(accounts[0]).call();
     const isOwner = await contract.methods.storeOwners(accounts[0]).call();
 
@@ -125,9 +126,9 @@ class App extends Component {
   }
 
   updateProductPrice = async (sku, price) => {
-    const { accounts, contract, web3 } = this.state;
+    const { accounts, contract } = this.state;
 
-    return contract.methods.updateProductPrice(sku, web3.utils.toWei(price)).send({from: accounts[0]});
+    return contract.methods.updateProductPrice(sku, price).send({from: accounts[0]});
   }
 
   updateProductCount = async (sku, price) => {
@@ -169,13 +170,13 @@ class App extends Component {
             web3={this.state.web3}
           />
         }
-        {!this.state.isAdmin && !this.state.isOwner &&
+        {(this.state.isAdmin === false && this.state.isOwner === false) ?
           <PublicMarketplace
             fetchMarketplaceStorefronts={this.fetchMarketplaceStorefronts}
             fetchProduct={this.fetchProduct}
             buyProduct={this.buyProduct}
             web3={this.state.web3}
-          />
+          /> : ''
         }
       </div>
     );

@@ -102,14 +102,14 @@ class OwnerDashboard extends Component {
     });
   }
 
-  addProduct(name, count, price, callback) {
+  addProduct(name, price, count, callback) {
     this.setState({
       status: `Adding new product "${name}" ...`,
       sentNewProductName: name,
       disabledProductAdd: true
     });
 
-    this.props.addProduct(this.state.currentStorefrontId, name, count, price)
+    this.props.addProduct(this.state.currentStorefrontId, name, price, count)
       .then(this.onAddProductSuccess.bind(this, callback))
       .catch(this.onAddProductError.bind(this));
   }
@@ -271,6 +271,7 @@ class OwnerDashboard extends Component {
                 disabled={this.state.disabledProductAdd}
                 storeId={this.state.currentStorefrontId}
                 addProduct={this.addProduct.bind(this)}
+                web3={this.props.web3}
               />
             </div>
           </div>
@@ -284,6 +285,7 @@ class OwnerDashboard extends Component {
                 deleteProduct={this.deleteProduct.bind(this)}
                 updateProductPrice={this.updateProductPrice.bind(this)}
                 updateProductCount={this.updateProductCount.bind(this)}
+                web3={this.props.web3}
               />
           ))
         }

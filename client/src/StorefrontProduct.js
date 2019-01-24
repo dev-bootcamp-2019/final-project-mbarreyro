@@ -20,7 +20,7 @@ class StorefrontProduct extends Component {
 
     this.setState({
       name: product.name,
-      price: product.price,
+      price: this.props.web3.utils.fromWei(product.price.toString()),
       count: product.count
     });
   }
@@ -42,7 +42,7 @@ class StorefrontProduct extends Component {
   }
 
   handleUpdatePriceClick() {
-    this.props.updateProductPrice(this.state.sku, this.state.price);
+    this.props.updateProductPrice(this.state.sku, this.props.web3.utils.toWei(this.state.price.toString()));
   }
 
   handleUpdateCountClick() {

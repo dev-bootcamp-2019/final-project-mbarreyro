@@ -32,8 +32,8 @@ class AddProduct extends Component {
   handleAddClick() {
     this.props.addProduct(
       this.state.name,
+      this.props.web3.utils.toWei(this.state.price.toString()),
       this.state.count,
-      this.state.price,
       this.clear.bind(this)
     );
   }
@@ -54,10 +54,12 @@ class AddProduct extends Component {
           Name:
           <input type='text' value={this.state.name} onChange={e => this.handleNameChange(e.target.value)}/>
         </label>
+        <br/>
         <label>
           Price:
-          <input type='number' value={this.state.price} min={0} onChange={e => this.handlePriceChange(e.target.value)}/>
+          <input type='number' value={this.state.price} min={0} onChange={e => this.handlePriceChange(e.target.value)}/>ETH
         </label>
+        <br/>
         <label>
           Count:
           <input type='number' value={this.state.count} min={0} onChange={e => this.handleCountChange(e.target.value)}/>
