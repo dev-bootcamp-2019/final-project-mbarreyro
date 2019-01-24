@@ -25,7 +25,13 @@ class Product extends Component {
   }
 
   handleBuyClick () {
-    this.props.buyProduct(this.props.sku, this.state.price);
+    this.props
+      .buyProduct(this.props.sku, this.state.price)
+      .then(this.buySuccess.bind(this));
+  }
+
+  buySuccess () {
+    this.fetchProduct();
   }
 
   render() {
@@ -35,7 +41,10 @@ class Product extends Component {
         {this.state.price !== null &&
           <span>${this.props.web3.utils.fromWei(this.state.price)}eth</span>
         }
-        <button onClick={() => this.handleBuyClick()}>Buy</button>
+        ({this.state.count} in stock)
+        <button disabled={parseInt(this.state.count, 10) === 0} onClick={() => this.handleBuyClick()}>
+          {this.state.count > 0 ? 'Buy' : 'Out of stock'}
+        </button>
       </fieldset>
     );
   }

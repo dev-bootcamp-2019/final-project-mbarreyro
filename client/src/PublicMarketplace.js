@@ -22,7 +22,7 @@ class PublicMarketplace extends Component {
   }
 
   buyProduct(sku, price) {
-    this.props.buyProduct(sku, price)
+    return this.props.buyProduct(sku, price)
       .then(this.buySuccess.bind(this))
       .catch(this.buyError.bind(this));
   }
