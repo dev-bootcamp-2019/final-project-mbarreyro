@@ -245,7 +245,6 @@ class OwnerDashboard extends Component {
             </ul>
           </div>
         }
-
         <div>
           <label>
             Add new storefront:
