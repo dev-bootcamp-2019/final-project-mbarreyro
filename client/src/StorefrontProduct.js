@@ -6,8 +6,8 @@ class StorefrontProduct extends Component {
     this.state = {
       sku: props.sku,
       name: null,
-      price: null,
-      count: null
+      price: 0,
+      count: 0
     };
   }
 
