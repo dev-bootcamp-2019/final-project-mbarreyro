@@ -137,10 +137,11 @@ class App extends Component {
     return contract.methods.updateProductCount(sku, price).send({from: accounts[0]});
   }
 
-  buyProduct = async (sku, price) => {
+  buyProduct = async (sku, price, amount) => {
     const { accounts, contract } = this.state;
+    const value = amount * price;
 
-    return contract.methods.buyProduct(sku, 1).send({from: accounts[0], value: price});
+    return contract.methods.buyProduct(sku, amount).send({from: accounts[0], value});
   }
 
   withdraw = async() => {

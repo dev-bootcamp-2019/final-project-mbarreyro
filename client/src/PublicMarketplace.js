@@ -21,8 +21,8 @@ class PublicMarketplace extends Component {
     });
   }
 
-  buyProduct(sku, price) {
-    return this.props.buyProduct(sku, price)
+  buyProduct(sku, price, amount) {
+    return this.props.buyProduct(sku, price, amount)
       .then(this.buySuccess.bind(this))
       .catch(this.buyError.bind(this));
   }
