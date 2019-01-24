@@ -158,10 +158,10 @@ contract Marketplace {
       return balances[msg.sender];
   }
 
-  function withdraw() public onlyActiveOwner {
-      uint amount = balances[msg.sender];
+  function withdraw(uint amount) public onlyActiveOwner {
+      require(amount <= balances[msg.sender], 'You dont have enough founds to perform this operation');
 
-      balances[msg.sender] = 0;
+      balances[msg.sender] -= amount;
       msg.sender.transfer(amount);
   }
 }

@@ -16,7 +16,8 @@ class OwnerDashboard extends Component {
       currentStorefrontIndex: null,
       currentStorefrontSkus: null,
       storefronts: [],
-      disabledProductAdd: false
+      disabledProductAdd: false,
+      withdrawAmount: null
     };
   }
 
@@ -36,7 +37,7 @@ class OwnerDashboard extends Component {
 
     let updates = {
         status: `Found ${storefronts.length} storefronts.`,
-        balance,
+        balance: this.props.web3.utils.fromWei(balance.toString()),
         storefronts
     };
 
@@ -227,9 +228,15 @@ class OwnerDashboard extends Component {
   }
 
   handleWithdrawClick() {
-    this.props.withdraw()
+    this.props.withdraw(this.props.web3.utils.toWei(this.state.withdrawAmount.toString()))
       .then(this.fetchOwnerData.bind(this))
       .catch((receipt) => console.log(receipt));
+  }
+
+  handleWithdrawAmountChange(amount) {
+    this.setState({
+      withdrawAmount: amount
+    })
   }
 
   render() {
@@ -241,10 +248,19 @@ class OwnerDashboard extends Component {
           <h2>
             Your balance is:
             {this.state.balance !== null &&
-              <span>${this.props.web3.utils.fromWei(this.state.balance.toString())}eth</span>
+              <span>${this.state.balance}eth</span>
             }
           </h2>
-          <button onClick={() => this.handleWithdrawClick()}>Withdraw</button>
+          <input type="number" min={0} max={this.state.balance} onChange={(e) => this.handleWithdrawAmountChange(e.target.value)} />
+          <button
+            disabled={
+              this.state.withdrawAmount === null
+              ||
+              this.state.withdrawAmount < 0
+              ||
+              this.state.withdrawAmount > this.state.balance
+            }
+            onClick={() => this.handleWithdrawClick()}> Withdraw </button>
         </div>
         {this.state.storefronts.length > 0 &&
           <div>
