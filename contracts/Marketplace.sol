@@ -1,10 +1,8 @@
 pragma solidity ^0.5.0;
+import "./Administrable.sol";
+import "./EmergencyStoppable.sol";
 
-contract Marketplace {
-  address private owner;
-  address[] private admins;
-
-  mapping (address => bool) public isAdmin;
+contract Marketplace is Administrable, EmergencyStoppable {
   mapping (address => bool) public storeOwners;
   mapping (address => uint[]) public ownerStorefrontIds;
 
@@ -32,19 +30,8 @@ contract Marketplace {
       uint indexInStorefront;
   }
 
-  constructor(address[] memory _admins) public {
-      for (uint i = 0; i < _admins.length; i++) {
-          isAdmin[_admins[i]] = true;
-      }
+  constructor(address[] memory _admins) Administrable(_admins) EmergencyStoppable(_admins) public {
 
-      isAdmin[msg.sender] = true;
-      owner = msg.sender;
-      admins = _admins;
-  }
-
-  modifier onlyAdmin() {
-      require(isAdmin[msg.sender]);
-      _;
   }
 
   modifier onlyActiveOwner() {
@@ -137,7 +124,7 @@ contract Marketplace {
       products[_sku].count = count;
   }
 
-  function buyProduct(uint _sku, uint quantity) public payable {
+  function buyProduct(uint _sku, uint quantity) public payable stopInEmergency {
       require(quantity > 0);
       require(products[_sku].count >= quantity);
       require(products[_sku].price * quantity <= msg.value);
@@ -158,7 +145,7 @@ contract Marketplace {
       return balances[msg.sender];
   }
 
-  function withdraw(uint amount) public onlyActiveOwner {
+  function withdraw(uint amount) public onlyActiveOwner stopInEmergency {
       require(amount <= balances[msg.sender], 'You dont have enough founds to perform this operation');
 
       balances[msg.sender] -= amount;
