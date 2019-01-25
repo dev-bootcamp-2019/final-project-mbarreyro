@@ -168,6 +168,9 @@ class App extends Component {
     }
     return (
       <div className="App">
+        <div>
+          Current Account: {this.state.accounts[0]}
+        </div>
         {this.state.isAdmin &&
           <AdminDashboard
             addNewStoreOwner={this.addNewStoreOwner}
