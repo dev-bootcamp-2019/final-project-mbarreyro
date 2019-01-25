@@ -51,11 +51,25 @@ class AdminDashboard extends Component {
     console.log(receipt);
   }
 
+  handleStopClick() {
+    this.props.stopContract();
+  }
+
+  handleStartClick() {
+    this.props.startContract();
+  }
+
   render() {
     return (
       <div>
         <h1>Welcome to your dashboard</h1>
         <p><i>{this.state.status}</i></p>
+        <fieldset>
+          <legend>Marketplace Circuit Breaker</legend>
+          <button onClick={() => this.handleStopClick()}>Stop</button>
+          <button onClick={() => this.handleStartClick()}>Start</button><br />
+          <i>This will affect the buy product and withdraw actions</i>
+        </fieldset>
         <label>
           Add a new Owner:
           <input type='text' value={this.state.address} name='address' onChange={e => this.handleInput(e.target.value)} />

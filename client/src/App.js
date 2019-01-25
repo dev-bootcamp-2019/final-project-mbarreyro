@@ -150,13 +150,31 @@ class App extends Component {
     return contract.methods.withdraw(amount).send({from: accounts[0]});
   }
 
+  stopContract = async () => {
+    const { accounts, contract } = this.state;
+
+    return contract.methods.stop().send({from: accounts[0]});
+  }
+
+  startContract = async () => {
+    const { accounts, contract } = this.state;
+
+    return contract.methods.start().send({from: accounts[0]});
+  }
+
   render() {
     if (!this.state.web3) {
       return <div>Loading Web3, accounts, and contract...</div>;
     }
     return (
       <div className="App">
-        {this.state.isAdmin && <AdminDashboard addNewStoreOwner={this.addNewStoreOwner} />}
+        {this.state.isAdmin &&
+          <AdminDashboard
+            addNewStoreOwner={this.addNewStoreOwner}
+            stopContract={this.stopContract}
+            startContract={this.startContract}
+          />
+        }
         {this.state.isOwner &&
           <OwnerDashboard
             fetchOwnerStorefronts={this.fetchOwnerStorefronts}
