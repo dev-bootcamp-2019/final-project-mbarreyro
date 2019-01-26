@@ -171,7 +171,9 @@ contract("Marketplace", accounts => {
     // Calculate the amount of ether used for this Tx
     const usedEther = parseInt(freezerPrice, 10) + txCost;
 
-    assert.equal(parseInt(balanceAfter, 10), parseInt(balanceBefore, 10) - parseInt(usedEther, 10), "Balance after should be before less price and tx cost");
+    // We approximate after account balance because calculation is not always exact
+    const diff = Math.abs((parseInt(balanceBefore, 10) - parseInt(usedEther, 10)) - parseInt(balanceAfter, 10));
+    assert.isBelow(diff, 20000, "Balance after should be before less price and tx cost");
 
     // Store owner internal balance is incremented by product price
     let balance = await marketplaceInstance.balance.call({from: storeOwner1});
@@ -200,6 +202,9 @@ contract("Marketplace", accounts => {
     const withdrwedEther = parseInt(amountToWithdraw, 10) - txCost;
 
     assert.equal(parseInt(internalBalanceBefore, 10) - parseInt(internalBalanceAfter, 10), parseInt(amountToWithdraw, 10), 'balance after should be before less price * quantity');
-    assert.equal(parseInt(balanceAfter, 10), parseInt(balanceBefore, 10) + parseInt(withdrwedEther, 10), "Balance after should be before plus withdraw amount less Tx cost");
+
+    // We approximate after account balance because calculation is not always exact
+    const diff = Math.abs(parseInt(balanceAfter, 10) - (parseInt(balanceBefore, 10) + parseInt(withdrwedEther, 10)));
+    assert.isBelow(diff, 20000, "Balance after should be before plus withdraw amount less Tx cost");
   });
 });
