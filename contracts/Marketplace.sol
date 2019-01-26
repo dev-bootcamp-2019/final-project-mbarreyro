@@ -86,6 +86,7 @@ contract Marketplace is Administrable, EmergencyStoppable {
   }
 
   function getProduct(uint _sku) public view returns (uint sku, string memory name, uint price, uint count, uint storefrontId) {
+      require(products[_sku].sku != 0, 'Product does not exist');
       sku = products[_sku].sku;
       name = products[_sku].name;
       price = products[_sku].price;

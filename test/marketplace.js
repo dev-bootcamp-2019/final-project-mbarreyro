@@ -1,110 +1,188 @@
 const Marketplace = artifacts.require("./Marketplace.sol");
 
 contract("Marketplace", accounts => {
+  const admin = accounts[0];
+  const storeOwner1 = accounts[2];
+  const storeOwner2 = accounts[3];
+  const externalUser = accounts[4];
+  const storefront1Id = 1;
+  const storefront2Id = 2;
+
+  const freezerId = 1;
+  const freezerPrice = web3.utils.toWei('2', 'ether');
+  const microwaveId = 2;
+  const microwavePrice = web3.utils.toWei('1.5', 'ether');
+
   it("...admin account should be able to add store owner", async () => {
+    /*
+      Tests that an admin should be able to add store owners
+    */
     const marketplaceInstance = await Marketplace.deployed();
 
-    // Add store owner
-    await marketplaceInstance.addStoreOwner(accounts[2], { from: accounts[0] });
+    // Check store owners are not active yet
+    const storeOwner1Inactive = await marketplaceInstance.storeOwners.call(storeOwner1);
+    const storeOwner2Inactive = await marketplaceInstance.storeOwners.call(storeOwner2);
+    assert.equal(storeOwner1Inactive, false, "Store owner 1 should be inactive before add call");
+    assert.equal(storeOwner2Inactive, false, "Store owner 2 should be inactive before add call");
 
-    // Get store owner
-    const storeOwnerActive = await marketplaceInstance.storeOwners.call(accounts[2]);
+    // Add store owners
+    await marketplaceInstance.addStoreOwner(storeOwner1, { from: admin });
+    await marketplaceInstance.addStoreOwner(storeOwner2, { from: admin });
 
-    assert.equal(storeOwnerActive, true, "Store owner should be active");
+    // Check store owners are now active
+    const storeOwner1Aactive = await marketplaceInstance.storeOwners.call(storeOwner1);
+    const storeOwner2Active = await marketplaceInstance.storeOwners.call(storeOwner2);
+    assert.equal(storeOwner1Aactive, true, "Store owner 1 should be active after add call");
+    assert.equal(storeOwner2Active, true, "Store owner 2 should be active after add call");
   });
 
-  it("...not admin should not be able to add an store owner", async () => {
-    const marketplaceInstance = await Marketplace.deployed();
+  it("...not admin account should not be able to add an store owner", async () => {
+    /*
+      An external user attemps to add himself as an store owner
+    */
     let failed = false;
 
+    const marketplaceInstance = await Marketplace.deployed();
+
     try {
-      // Try to add store owner
-      await marketplaceInstance.addStoreOwner(accounts[3], { from: accounts[3] });
+      // Exteral user calls add store owner with himself as parameter
+      await marketplaceInstance.addStoreOwner(externalUser, { from: externalUser });
     } catch(e) {
       failed = true;
     }
 
     // Get store owner
-    const storeOwnerActive = await marketplaceInstance.storeOwners.call(accounts[3]);
+    const storeOwnerActive = await marketplaceInstance.storeOwners.call(externalUser);
 
-    assert.equal(storeOwnerActive, false, "Store owner must not be active");
-    assert.equal(failed, true, "Store owner must not be active");
+    assert.equal(storeOwnerActive, false, "External user shound not be active as store owner");
+    assert.equal(failed, true, "Add store owner call should have raised an error");
   });
 
-  it("...active owner can add storefront", async () => {
+  it("...active owner can add storefronts", async () => {
+    /*
+      An active store owner adds storefronts
+    */
     const marketplaceInstance = await Marketplace.deployed();
 
-    // Add storefront
-    await marketplaceInstance.addStorefront('My store 1', { from: accounts[2] });
-    await marketplaceInstance.addStorefront('My store 2', { from: accounts[2] });
+    // Add storefronts
+    await marketplaceInstance.addStorefront('My store 1', { from: storeOwner1 });
+    await marketplaceInstance.addStorefront('My store 2', { from: storeOwner1 });
 
-    // Get recently added storefront
-    const storefront1 = await marketplaceInstance.getStorefront.call(1, { from: accounts[2] });
-    const storefront2 = await marketplaceInstance.getStorefront.call(2, { from: accounts[2] });
-    const id0 = await marketplaceInstance.ownerStorefrontIds.call(accounts[2], 0, { from: accounts[2] });
-    const id1 = await marketplaceInstance.ownerStorefrontIds.call(accounts[2], 1, { from: accounts[2] });
-    const len = await marketplaceInstance.getOwnerStorefrontCount.call(accounts[2]);
+    // Get recently added storefronts
+    const storefront1 = await marketplaceInstance.getStorefront.call(storefront1Id, { from: storeOwner1 });
+    const storefront2 = await marketplaceInstance.getStorefront.call(storefront2Id, { from: storeOwner1 });
+    const id0 = await marketplaceInstance.ownerStorefrontIds.call(storeOwner1, 0, { from: storeOwner1 });
+    const id1 = await marketplaceInstance.ownerStorefrontIds.call(storeOwner1, 1, { from: storeOwner1 });
+    const len = await marketplaceInstance.getOwnerStorefrontCount.call(storeOwner1);
 
-    assert.equal(storefront1.id, 1, "Store 1 should have id = 1");
+    assert.equal(storefront1.id, storefront1Id, "Store 1 should have id = 1");
     assert.equal(storefront1.name, 'My store 1', "Store 1 be named My store 1");
-    assert.equal(storefront2.id, 2, "Store 2 should have id = 2");
+    assert.equal(storefront2.id, storefront2Id, "Store 2 should have id = 2");
     assert.equal(storefront2.name, 'My store 2', "Store 2 be named My store 2");
-    assert.equal(id0, 1, "Ids returned index 0 should be 1");
-    assert.equal(id1, 2, "Ids returned index 1 should be 2");
+    assert.equal(id0, storefront1Id, "Ids returned index 0 should be 1");
+    assert.equal(id1, storefront2Id, "Ids returned index 1 should be 2");
     assert.equal(len, 2, "Store owner should have 2 storefront ids");
   });
 
   it("...active owner can add new product to storefront", async () => {
+    /*
+     * One of the active store owners adds two new products. A Freezer and a Microwave
+     *
+     */
     const marketplaceInstance = await Marketplace.deployed();
 
-    await marketplaceInstance.addProduct(2, 'Cuchillo', 10, 1000000, { from: accounts[2] });
+    // Adds products
+    await marketplaceInstance.addProduct(storefront1Id, 'Freezer', 10, freezerPrice, { from: storeOwner1 });
+    await marketplaceInstance.addProduct(storefront1Id, 'Microwave', 15, microwavePrice, { from: storeOwner1 });
 
-    const product = await marketplaceInstance.getProduct.call(1, { from: accounts[2] });
-    const storefront = await marketplaceInstance.getStorefront.call(2, { from: accounts[2] });
+    // Get products and storefront information
+    const freezer = await marketplaceInstance.getProduct.call(freezerId, { from: storeOwner1 });
+    const microwave = await marketplaceInstance.getProduct.call(microwaveId, { from: storeOwner1 });
 
-    assert.equal(product.sku, 1, 'First product sku should be 1');
-    assert.equal(product.name, 'Cuchillo', 'First product name should be Cuchillo');
-    assert.equal(storefront.skus.length, 1, 'Storefront should have one product');
+    const storefront = await marketplaceInstance.getStorefront.call(storefront1Id, { from: storeOwner1 });
+
+    assert.equal(freezer.sku, freezerId, 'Freezer sku should be 1');
+    assert.equal(freezer.name, 'Freezer', 'First product name should be Freezer');
+    assert.equal(microwave.sku, microwaveId, 'Microwave sku should be 2');
+    assert.equal(microwave.name, 'Microwave', 'Second product name should be Microwave');
+    assert.equal(storefront.skus.length, 2, 'Storefront should have two products');
   });
 
-  it("...active owner can add and remove new product to storefront", async () => {
+  it("...active owner can remove an existing product from storefront", async () => {
+    /*
+     * Store owner deletes a product, storefront products count is reduced by 1
+     * An attempt to retrieve product fails
+     */
     const marketplaceInstance = await Marketplace.deployed();
 
-    await marketplaceInstance.addProduct(2, 'Plato', 15, 105, { from: accounts[2] });
+    // Check product exists
+    const microwaveExists = await marketplaceInstance.getProduct(microwaveId);
+    assert.equal(microwaveExists.sku, microwaveId, 'Microwave should exist');
 
-    const product = await marketplaceInstance.getProduct.call(2, { from: accounts[2] });
-    const storefront = await marketplaceInstance.getStorefront.call(2, { from: accounts[2] });
+    // Delete product
+    await marketplaceInstance.deleteProduct(microwaveId, { from: storeOwner1 });
 
-    assert.equal(product.sku, 2, 'First product sku should be 1');
-    assert.equal(product.name, 'Plato', 'Second product name should be Plato');
-    assert.equal(storefront.skus.length, 2, 'Storefront should have two products');
+    // Check does note exist. Get product fails
+    let failed = false;
+    try {
+        const microwaveFails = await marketplaceInstance.getProduct(microwaveId);
+    } catch (e) {
+      failed = true;
+    }
+    assert.equal(failed, true, 'Get Microwave fails after delete');
 
-    await marketplaceInstance.deleteProduct(2, { from: accounts[2] });
-    //
-    const storefrontAfterDelete = await marketplaceInstance.getStorefront.call(2, { from: accounts[2] });
+    // Check storefront SKUs amount is now 1
+    const storefrontAfterDelete = await marketplaceInstance.getStorefront.call(storefront1Id, { from: storeOwner1 });
     assert.equal(storefrontAfterDelete.skus.length, 1, 'Storefront should have one product');
   });
 
   it("...an external user buys a product", async () => {
+    /*
+     * An external user buys a Freezer. We check account balance before and after
+     */
     const marketplaceInstance = await Marketplace.deployed();
 
-    let balanceBefore = await web3.eth.getBalance(accounts[4]);
-    let tx = await marketplaceInstance.buyProduct(1, 3, {from: accounts[4], value: 4000000});
-    let balanceAfter = await web3.eth.getBalance(accounts[4]);
+    // Get gas price for balance calculations
+    const gasPrice = await web3.eth.getGasPrice();
 
-    assert.isBelow(parseInt(balanceAfter, 10), parseInt(balanceBefore, 10) - parseInt(3000000, 10), "Balance after should be before less price");
+    let balanceBefore = await web3.eth.getBalance(externalUser);
+    let tx = await marketplaceInstance.buyProduct(freezerId, 1, {from: externalUser, value: freezerPrice});
+    let balanceAfter = await web3.eth.getBalance(externalUser);
 
-    let balance = await marketplaceInstance.balance.call({from: accounts[2]});
-    assert.equal(parseInt(balance, 10), 3000000, 'balance should be equal to price * quantity');
+    const txCost = parseInt(tx.receipt.gasUsed, 10) * parseInt(gasPrice, 10);
+
+    // Calculate the amount of ether used for this Tx
+    const usedEther = parseInt(freezerPrice, 10) + txCost;
+
+    assert.equal(parseInt(balanceAfter, 10), parseInt(balanceBefore, 10) - parseInt(usedEther, 10), "Balance after should be before less price and tx cost");
+
+    // Store owner internal balance is incremented by product price
+    let balance = await marketplaceInstance.balance.call({from: storeOwner1});
+    assert.equal(parseInt(balance, 10), parseInt(freezerPrice, 10), 'balance should be equal to price * quantity');
   });
 
   it("...an store owner should be able to withdraw founds", async () => {
+    /*
+     * A Store Owner withdraws an amount of ether from his internal balance
+     */
     const marketplaceInstance = await Marketplace.deployed();
+    const amountToWithdraw = web3.utils.toWei('1', 'ether');
+    // Get gas price for balance calculations
+    const gasPrice = await web3.eth.getGasPrice();
 
-    let balanceBefore = await marketplaceInstance.balance.call({from: accounts[2]});
-    let tx = await marketplaceInstance.withdraw(3000000, {from: accounts[2]});
-    let balanceAfter = await marketplaceInstance.balance.call({from: accounts[2]});
+    // Get balance after, withdraw and check the difference is equal to withdrawed amount
+    let internalBalanceBefore = await marketplaceInstance.balance.call({from: storeOwner1});
+    let balanceBefore = await web3.eth.getBalance(storeOwner1);
 
-    assert.equal(parseInt(balanceBefore, 10) - 3000000, parseInt(balanceAfter, 10), 'balance after should be before less price * quantity');
+    let tx = await marketplaceInstance.withdraw(amountToWithdraw, {from: storeOwner1});
+
+    let internalBalanceAfter = await marketplaceInstance.balance.call({from: storeOwner1});
+    let balanceAfter = await web3.eth.getBalance(storeOwner1);
+
+    const txCost = parseInt(tx.receipt.gasUsed, 10) * parseInt(gasPrice, 10);
+    const withdrwedEther = parseInt(amountToWithdraw, 10) - txCost;
+
+    assert.equal(parseInt(internalBalanceBefore, 10) - parseInt(internalBalanceAfter, 10), parseInt(amountToWithdraw, 10), 'balance after should be before less price * quantity');
+    assert.equal(parseInt(balanceAfter, 10), parseInt(balanceBefore, 10) + parseInt(withdrwedEther, 10), "Balance after should be before plus withdraw amount less Tx cost");
   });
 });
