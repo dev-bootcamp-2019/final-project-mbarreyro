@@ -2,154 +2,158 @@ pragma solidity ^0.5.0;
 import "./Administrable.sol";
 import "./EmergencyStoppable.sol";
 
+/**
+ * @title A Marketplace
+ * @author Martin Ernesto Barreyro (barreyromartin@gmail.com)
+ */
 contract Marketplace is Administrable, EmergencyStoppable {
-  mapping (address => bool) public storeOwners;
-  mapping (address => uint[]) public ownerStorefrontIds;
+    mapping (address => bool) public storeOwners;
+    mapping (address => uint[]) public ownerStorefrontIds;
 
-  mapping (address => uint) private balances;
+    mapping (address => uint) private balances;
 
-  uint private storefrontsCount;
-  mapping (uint => Storefront) private storefronts;
+    uint private storefrontsCount;
+    mapping (uint => Storefront) private storefronts;
 
-  uint private skuCount;
-  mapping (uint => Product) private products;
+    uint private skuCount;
+    mapping (uint => Product) private products;
 
-  struct Storefront {
-      uint id;
-      string name;
-      address storeOwner;
-      uint[] skus;
-  }
+    struct Storefront {
+        uint id;
+        string name;
+        address storeOwner;
+        uint[] skus;
+    }
 
-  struct Product {
-      uint sku;
-      string name;
-      uint count;
-      uint price;
-      uint storefrontId;
-      uint indexInStorefront;
-  }
+    struct Product {
+        uint sku;
+        string name;
+        uint count;
+        uint price;
+        uint storefrontId;
+        uint indexInStorefront;
+    }
 
-  constructor(address[] memory _admins) Administrable(_admins) EmergencyStoppable(_admins) public {
+    constructor(address[] memory _admins) Administrable(_admins) EmergencyStoppable(_admins) public {
 
-  }
+    }
 
-  modifier onlyActiveOwner() {
-      require(storeOwners[msg.sender]);
-      _;
-  }
+    modifier onlyActiveOwner() {
+        require(storeOwners[msg.sender]);
+        _;
+    }
 
-  function addStoreOwner(address storeOwner) public onlyAdmin {
-      require(!storeOwners[storeOwner], 'Owner already exists');
+    function addStoreOwner(address storeOwner) public onlyAdmin {
+        require(!storeOwners[storeOwner], 'Owner already exists');
 
-      storeOwners[storeOwner] = true;
-  }
+        storeOwners[storeOwner] = true;
+    }
 
-  function addStorefront(string memory name) public onlyActiveOwner returns (uint) {
-      storefrontsCount++;
-      ownerStorefrontIds[msg.sender].push(storefrontsCount);
-      storefronts[storefrontsCount].id = storefrontsCount;
-      storefronts[storefrontsCount].name = name;
-      storefronts[storefrontsCount].storeOwner = msg.sender;
+    function addStorefront(string memory name) public onlyActiveOwner returns (uint) {
+        storefrontsCount++;
+        ownerStorefrontIds[msg.sender].push(storefrontsCount);
+        storefronts[storefrontsCount].id = storefrontsCount;
+        storefronts[storefrontsCount].name = name;
+        storefronts[storefrontsCount].storeOwner = msg.sender;
 
-      return storefrontsCount;
-  }
+        return storefrontsCount;
+    }
 
-  function getStorefront(uint _id) public view returns (uint id, string memory name, uint[] memory skus) {
-      id = storefronts[_id].id;
-      name = storefronts[_id].name;
-      skus = storefronts[_id].skus;
-  }
+    function getStorefront(uint _id) public view returns (uint id, string memory name, uint[] memory skus) {
+        id = storefronts[_id].id;
+        name = storefronts[_id].name;
+        skus = storefronts[_id].skus;
+    }
 
-  function getOwnerStorefrontCount(address storeOwner) public view returns (uint) {
-      return ownerStorefrontIds[storeOwner].length;
-  }
+    function getOwnerStorefrontCount(address storeOwner) public view returns (uint) {
+        return ownerStorefrontIds[storeOwner].length;
+    }
 
-  function getStorefrontCount() public view returns (uint) {
-      return storefrontsCount;
-  }
+    function getStorefrontCount() public view returns (uint) {
+        return storefrontsCount;
+    }
 
-  function addProduct(uint _storefrontId, string memory name, uint count, uint price) public onlyActiveOwner returns (uint) {
-      require(storefronts[_storefrontId].storeOwner == msg.sender);
-      require(price > 0);
+    function addProduct(uint _storefrontId, string memory name, uint count, uint price) public onlyActiveOwner returns (uint) {
+        require(storefronts[_storefrontId].storeOwner == msg.sender);
+        require(price > 0);
 
-      skuCount++;
+        skuCount++;
 
-      products[skuCount].storefrontId = _storefrontId;
-      products[skuCount].sku = skuCount;
-      products[skuCount].name = name;
-      products[skuCount].price = price;
-      products[skuCount].count = count;
-      products[skuCount].indexInStorefront = storefronts[_storefrontId].skus.push(skuCount) - 1;
+        products[skuCount].storefrontId = _storefrontId;
+        products[skuCount].sku = skuCount;
+        products[skuCount].name = name;
+        products[skuCount].price = price;
+        products[skuCount].count = count;
+        products[skuCount].indexInStorefront = storefronts[_storefrontId].skus.push(skuCount) - 1;
 
-      return skuCount;
-  }
+        return skuCount;
+    }
 
-  function getProduct(uint _sku) public view returns (uint sku, string memory name, uint price, uint count, uint storefrontId) {
-      require(products[_sku].sku != 0, 'Product does not exist');
-      sku = products[_sku].sku;
-      name = products[_sku].name;
-      price = products[_sku].price;
-      count = products[_sku].count;
-      storefrontId = products[_sku].storefrontId;
-  }
+    function getProduct(uint _sku) public view returns (uint sku, string memory name, uint price, uint count, uint storefrontId) {
+        require(products[_sku].sku != 0, 'Product does not exist');
+        sku = products[_sku].sku;
+        name = products[_sku].name;
+        price = products[_sku].price;
+        count = products[_sku].count;
+        storefrontId = products[_sku].storefrontId;
+    }
 
-  function deleteProduct(uint _sku) public onlyActiveOwner {
-      require(storefronts[products[_sku].storefrontId].storeOwner == msg.sender);
+    function deleteProduct(uint _sku) public onlyActiveOwner {
+        require(storefronts[products[_sku].storefrontId].storeOwner == msg.sender);
 
-      uint storefrontId = products[_sku].storefrontId;
-      uint index = products[_sku].indexInStorefront;
-      uint skusLength = storefronts[storefrontId].skus.length;
+        uint storefrontId = products[_sku].storefrontId;
+        uint index = products[_sku].indexInStorefront;
+        uint skusLength = storefronts[storefrontId].skus.length;
 
-      require(skusLength > 0);
+        require(skusLength > 0);
 
-      if (skusLength > 1) {
-          // Replace
-          storefronts[storefrontId].skus[index] = storefronts[storefrontId].skus[skusLength - 1];
-          products[storefronts[storefrontId].skus[index]].indexInStorefront = index;
-      }
+        if (skusLength > 1) {
+            // Replace
+            storefronts[storefrontId].skus[index] = storefronts[storefrontId].skus[skusLength - 1];
+            products[storefronts[storefrontId].skus[index]].indexInStorefront = index;
+        }
 
-      delete products[_sku];
-      storefronts[storefrontId].skus.length--;
-  }
+        delete products[_sku];
+        storefronts[storefrontId].skus.length--;
+    }
 
-  function updateProductPrice(uint _sku, uint price) public onlyActiveOwner {
-      require(storefronts[products[_sku].storefrontId].storeOwner == msg.sender);
+    function updateProductPrice(uint _sku, uint price) public onlyActiveOwner {
+        require(storefronts[products[_sku].storefrontId].storeOwner == msg.sender);
 
-      products[_sku].price = price;
-  }
+        products[_sku].price = price;
+    }
 
-  function updateProductCount(uint _sku, uint count) public onlyActiveOwner {
-      require(storefronts[products[_sku].storefrontId].storeOwner == msg.sender);
+    function updateProductCount(uint _sku, uint count) public onlyActiveOwner {
+        require(storefronts[products[_sku].storefrontId].storeOwner == msg.sender);
 
-      products[_sku].count = count;
-  }
+        products[_sku].count = count;
+    }
 
-  function buyProduct(uint _sku, uint quantity) public payable stopInEmergency {
-      require(quantity > 0);
-      require(products[_sku].count >= quantity);
-      require(products[_sku].price * quantity <= msg.value);
+    function buyProduct(uint _sku, uint quantity) public payable stopInEmergency {
+        require(quantity > 0);
+        require(products[_sku].count >= quantity);
+        require(products[_sku].price * quantity <= msg.value);
 
-      Product memory product = products[_sku];
-      Storefront memory storefront = storefronts[product.storefrontId];
+        Product memory product = products[_sku];
+        Storefront memory storefront = storefronts[product.storefrontId];
 
-      balances[storefront.storeOwner] += products[_sku].price * quantity;
-      products[_sku].count -= quantity;
+        balances[storefront.storeOwner] += products[_sku].price * quantity;
+        products[_sku].count -= quantity;
 
-      uint toRefund = msg.value - products[_sku].price * quantity;
-      if (toRefund > 0) {
-        msg.sender.transfer(toRefund);
-      }
-  }
+        uint toRefund = msg.value - products[_sku].price * quantity;
+        if (toRefund > 0) {
+          msg.sender.transfer(toRefund);
+        }
+    }
 
-  function balance() public view onlyActiveOwner returns(uint) {
-      return balances[msg.sender];
-  }
+    function balance() public view onlyActiveOwner returns(uint) {
+        return balances[msg.sender];
+    }
 
-  function withdraw(uint amount) public onlyActiveOwner stopInEmergency {
-      require(amount <= balances[msg.sender], 'You dont have enough founds to perform this operation');
+    function withdraw(uint amount) public onlyActiveOwner stopInEmergency {
+        require(amount <= balances[msg.sender], 'You dont have enough founds to perform this operation');
 
-      balances[msg.sender] -= amount;
-      msg.sender.transfer(amount);
-  }
+        balances[msg.sender] -= amount;
+        msg.sender.transfer(amount);
+    }
 }
