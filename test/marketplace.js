@@ -108,7 +108,24 @@ contract("Marketplace", accounts => {
     assert.equal(storefront.skus.length, 2, 'Storefront should have two products');
   });
 
-  it("...active owner can remove an existing product from storefront", async () => {
+  it("...active store owner can not modify a product from another storefront owner", async () => {
+    /*
+     * An existing and active owner attemps to modify a product from another storefront owner
+     *
+     */
+    const marketplaceInstance = await Marketplace.deployed();
+    let failed = false;
+
+    try {
+        await marketplaceInstance.updateProductPrice(freezerId, 23232, { from: storeOwner2 });
+    } catch (e) {
+      failed = true;
+    }
+
+    assert.equal(failed, true, "trying to update a product from a different account than store owner should fail");
+  });
+
+  it("...active store owner can remove an existing product from storefront", async () => {
     /*
      * Store owner deletes a product, storefront products count is reduced by 1
      * An attempt to retrieve product fails
