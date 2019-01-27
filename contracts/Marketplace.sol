@@ -69,6 +69,11 @@ contract Marketplace is Administrable, EmergencyStoppable {
         onlyActiveOwner
         returns (uint)
     {
+        require(
+            storefrontsCount != ((2**256) - 1),
+            "No more storefronts can be added"
+        );
+
         storefrontsCount++;
         ownerStorefrontIds[msg.sender].push(storefrontsCount);
         storefronts[storefrontsCount].id = storefrontsCount;
@@ -133,6 +138,10 @@ contract Marketplace is Administrable, EmergencyStoppable {
     {
         require(storefronts[_storefrontId].storeOwner == msg.sender);
         require(price > 0);
+        require(
+            skuCount != ((2**256) - 1),
+            "No more products can be added"
+        );
 
         skuCount++;
 
@@ -176,7 +185,7 @@ contract Marketplace is Administrable, EmergencyStoppable {
      */
     function deleteProduct(uint _sku) public onlyActiveOwner {
         require(
-          storefronts[products[_sku].storefrontId].storeOwner == msg.sender
+            storefronts[products[_sku].storefrontId].storeOwner == msg.sender
         );
 
         // Storefront of the product to delete
@@ -219,7 +228,7 @@ contract Marketplace is Administrable, EmergencyStoppable {
      */
     function updateProductPrice(uint _sku, uint price) public onlyActiveOwner {
         require(
-          storefronts[products[_sku].storefrontId].storeOwner == msg.sender
+            storefronts[products[_sku].storefrontId].storeOwner == msg.sender
         );
 
         products[_sku].price = price;
@@ -232,7 +241,7 @@ contract Marketplace is Administrable, EmergencyStoppable {
      */
     function updateProductCount(uint _sku, uint count) public onlyActiveOwner {
         require(
-          storefronts[products[_sku].storefrontId].storeOwner == msg.sender
+            storefronts[products[_sku].storefrontId].storeOwner == msg.sender
         );
 
         products[_sku].count = count;
@@ -279,8 +288,8 @@ contract Marketplace is Administrable, EmergencyStoppable {
      */
     function withdraw(uint amount) public onlyActiveOwner stopInEmergency {
         require(
-          amount <= balances[msg.sender],
-          "You dont have enough founds to perform this operation"
+            amount <= balances[msg.sender],
+            "You dont have enough founds to perform this operation"
         );
 
         balances[msg.sender] -= amount;
