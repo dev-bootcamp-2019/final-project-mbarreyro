@@ -38,7 +38,8 @@ contract("Marketplace", accounts => {
 
   it("...not admin account should not be able to add an store owner", async () => {
     /*
-      An external user attemps to add himself as an store owner
+      An external user attemps to add himself as an store owner. This should fail
+      since only admins can add store owners
     */
     let failed = false;
 
@@ -117,6 +118,7 @@ contract("Marketplace", accounts => {
     let failed = false;
 
     try {
+        // This action should fail because Freezer product is owned by storeOwner1
         await marketplaceInstance.updateProductPrice(freezerId, 23232, { from: storeOwner2 });
     } catch (e) {
         failed = true;
@@ -128,7 +130,7 @@ contract("Marketplace", accounts => {
   it("...active store owner can remove an existing product from storefront", async () => {
     /*
      * Store owner deletes a product, storefront products count is reduced by 1
-     * An attempt to retrieve product fails
+     * An attempt to retrieve product fails.
      */
     const marketplaceInstance = await Marketplace.deployed();
 
@@ -155,7 +157,7 @@ contract("Marketplace", accounts => {
 
   it("...an external user buys a product", async () => {
     /*
-     * An external user buys a Freezer. We check account balance before and after
+     * An external user buys a Freezer. We check account balance before and after.
      */
     const marketplaceInstance = await Marketplace.deployed();
 
@@ -171,7 +173,8 @@ contract("Marketplace", accounts => {
     // Calculate the amount of ether used for this Tx
     const usedEther = parseInt(freezerPrice, 10) + txCost;
 
-    // We approximate after account balance because calculation is not always exact
+    // We approximate resulting account balance because calculation is not always exact
+    // 20000 Wei is a pretty small amount
     const diff = Math.abs((parseInt(balanceBefore, 10) - parseInt(usedEther, 10)) - parseInt(balanceAfter, 10));
     assert.isBelow(diff, 20000, "Balance after should be before less price and tx cost");
 
@@ -182,7 +185,7 @@ contract("Marketplace", accounts => {
 
   it("...an store owner should be able to withdraw founds", async () => {
     /*
-     * A Store Owner withdraws an amount of ether from his internal balance
+     * A Store Owner withdraws an amount of ether from his internal balance.
      */
     const marketplaceInstance = await Marketplace.deployed();
     const amountToWithdraw = web3.utils.toWei('1', 'ether');
@@ -204,6 +207,7 @@ contract("Marketplace", accounts => {
     assert.equal(parseInt(internalBalanceBefore, 10) - parseInt(internalBalanceAfter, 10), parseInt(amountToWithdraw, 10), 'balance after should be before less price * quantity');
 
     // We approximate after account balance because calculation is not always exact
+    // 20000 Wei is a pretty small amount
     const diff = Math.abs(parseInt(balanceAfter, 10) - (parseInt(balanceBefore, 10) + parseInt(withdrwedEther, 10)));
     assert.isBelow(diff, 20000, "Balance after should be before plus withdraw amount less Tx cost");
   });

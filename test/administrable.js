@@ -8,7 +8,7 @@ contract("Administrable", accounts => {
   it("...allows to check valid admins", async () => {
     /*
      * Check that first account (owner who has deployed the contract)
-     * is an admin
+     * is an admin. Other external account should not be considered an admin
      */
     const administrableInstance = await Administrable.deployed();
 

@@ -12,6 +12,7 @@ contract("EmergencyStoppable", accounts => {
     let failed = false;
 
     try {
+      // Since the account is from an admin this action should be successful
       await emergencyStoppableInstance.stop.call({ from: admin1 });
     } catch (e) {
       // this should never happen
@@ -21,6 +22,7 @@ contract("EmergencyStoppable", accounts => {
     assert.isFalse(failed, 'Stop call from an admin should not fail');
 
     try {
+      // Since call is made with an external account this should fail
       await emergencyStoppableInstance.stop.call({ from: externalUser });
     } catch (e) {
       // this should always happen
@@ -38,6 +40,7 @@ contract("EmergencyStoppable", accounts => {
     let failed = false;
 
     try {
+      // Since the account is from an admin this action should be successful
       await emergencyStoppableInstance.start.call({ from: admin1 });
     } catch (e) {
       // this should never happen
@@ -47,6 +50,7 @@ contract("EmergencyStoppable", accounts => {
     assert.isFalse(failed, 'Start call from an admin should not fail');
 
     try {
+      // Since call is made with an external account this should fail
       await emergencyStoppableInstance.start.call({ from: externalUser });
     } catch (e) {
       // this should always happen
