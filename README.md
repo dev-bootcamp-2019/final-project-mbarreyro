@@ -6,7 +6,7 @@ This application allows store owners (registered by admin accounts) add differen
 Any user (without being an account registered in this Marketplace) can browse storefronts and buy their products.
 Storefront owners that have sold products in this Marketplace can withdraw any founds gathered from these operations.
 
-## Setting up
+## Setting up
 
 This application is based in truffle box [react](https://truffleframework.com/boxes/react).
 
