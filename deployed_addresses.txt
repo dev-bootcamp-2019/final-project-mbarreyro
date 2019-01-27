@@ -1,0 +1,57 @@
+A flattened version of Marketplace was deployed to Rinkeby. Use MarketplaceFlattened code with
+Marketplace contract name.
+
+Rinkeby Tx: https://rinkeby.etherscan.io/tx/0x4fe1392ae41bcbce0b02ba64da223b3b3ce1e0bc34ba2f5333c2b88f9b09d188
+Rinkeby Contract Code: https://rinkeby.etherscan.io/address/0x01fA785660d5a0Ff072CeFB56fc8f31c90039ECe#code
+
+'Marketplace'
+ -----------------------
+ > transaction hash:    0x4fe1392ae41bcbce0b02ba64da223b3b3ce1e0bc34ba2f5333c2b88f9b09d188
+ > Blocks: 0            Seconds: 5
+ > contract address:    0x01fA785660d5a0Ff072CeFB56fc8f31c90039ECe
+ > account:             0x54Fc8b25605cDac08C0cDaF69F6FBBC05B8fa9FA
+ > balance:             2.81336122
+ > gas used:            2541056
+ > gas price:           20 gwei
+ > value sent:          0 ETH
+ > total cost:          0.05082112 ETH
+
+
+ 'Administrable'
+ -------------------------
+ > transaction hash:    0xd45f3a7ec489564ffbdd585eac8438a8180082eb230dc76d0e6fbba54d5a40d4
+ > Blocks: 0            Seconds: 5
+ > contract address:    0x029532673BBeC9A477B47CcC9c15aaE944662A55
+ > account:             0x54Fc8b25605cDac08C0cDaF69F6FBBC05B8fa9FA
+ > balance:             2.80848226
+ > gas used:            243948
+ > gas price:           20 gwei
+ > value sent:          0 ETH
+ > total cost:          0.00487896 ETH
+
+
+ 'EmergencyStoppable'
+ ------------------------------
+ > transaction hash:    0x9010de1e19c30527a21e2cb73fc5569d1da37c2fda6655df10e7ec45d17f542a
+ > Blocks: 0            Seconds: 9
+ > contract address:    0x08631BF6243353a58CcDBb1D8a85cC0Dc3512D0B
+ > account:             0x54Fc8b25605cDac08C0cDaF69F6FBBC05B8fa9FA
+ > balance:             2.80285486
+ > gas used:            281370
+ > gas price:           20 gwei
+ > value sent:          0 ETH
+ > total cost:          0.0056274 ETH
+
+ Initail Migration:
+
+ 'Migrations'
+----------------------
+ > transaction hash:    0x1623d528fc47b519d81d287405d3ac321e6fb6182cdc212e3a07cc0ecbe6c18f
+ > Blocks: 0            Seconds: 5
+ > contract address:    0x97bfAbe01E3Aa6Ef51c9d4FE5B137C9055C52f98
+ > account:             0x54Fc8b25605cDac08C0cDaF69F6FBBC05B8fa9FA
+ > balance:             2.86502302
+ > gas used:            284908
+ > gas price:           20 gwei
+ > value sent:          0 ETH
+ > total cost:          0.00569816 ETH
