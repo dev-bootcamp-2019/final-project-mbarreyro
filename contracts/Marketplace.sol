@@ -53,7 +53,7 @@ contract Marketplace is Administrable, EmergencyStoppable {
      * Adds a new storefront owner
      * @param storeOwner the address of the new store owner
      */
-    function addStoreOwner(address storeOwner) public onlyAdmin {
+    function addStoreOwner(address storeOwner) external onlyAdmin {
         require(!storeOwners[storeOwner], "Owner already exists");
 
         storeOwners[storeOwner] = true;
@@ -64,8 +64,8 @@ contract Marketplace is Administrable, EmergencyStoppable {
      * @param name the name of the new storefront
      * @return the ID of the new storefront
      */
-    function addStorefront(string memory name)
-        public
+    function addStorefront(string calldata name)
+        external
         onlyActiveOwner
         returns (uint)
     {
@@ -89,7 +89,7 @@ contract Marketplace is Administrable, EmergencyStoppable {
      * @return ID, name and SKU array of the storefront
      */
     function getStorefront(uint _id)
-        public
+        external
         view
         returns (uint id, string memory name, uint[] memory skus)
     {
@@ -104,7 +104,7 @@ contract Marketplace is Administrable, EmergencyStoppable {
      * @return the amount of storefronts of the specified store owner
      */
     function getOwnerStorefrontCount(address storeOwner)
-        public
+        external
         view
         returns (uint)
     {
@@ -114,7 +114,7 @@ contract Marketplace is Administrable, EmergencyStoppable {
     /**
      * @return the total amount of all storefronts of all owners
      */
-    function getStorefrontCount() public view returns (uint) {
+    function getStorefrontCount() external view returns (uint) {
         return storefrontsCount;
     }
 
@@ -128,11 +128,11 @@ contract Marketplace is Administrable, EmergencyStoppable {
      */
     function addProduct(
         uint _storefrontId,
-        string memory name,
+        string calldata name,
         uint count,
         uint price
     )
-        public
+        external
         onlyActiveOwner
         returns (uint)
     {
@@ -161,7 +161,7 @@ contract Marketplace is Administrable, EmergencyStoppable {
      * @return SKU, name, price and storefront ID of the product
      */
     function getProduct(uint _sku)
-        public
+        external
         view
         returns (
             uint sku,
@@ -183,7 +183,7 @@ contract Marketplace is Administrable, EmergencyStoppable {
      * Deletes a product
      * @param _sku the SKU of the product to remove
      */
-    function deleteProduct(uint _sku) public onlyActiveOwner {
+    function deleteProduct(uint _sku) external onlyActiveOwner {
         require(
             storefronts[products[_sku].storefrontId].storeOwner == msg.sender
         );
@@ -226,7 +226,10 @@ contract Marketplace is Administrable, EmergencyStoppable {
      * @param _sku the SKU of the product to update
      * @param price the new price of the product
      */
-    function updateProductPrice(uint _sku, uint price) public onlyActiveOwner {
+    function updateProductPrice(uint _sku, uint price)
+        external
+        onlyActiveOwner
+    {
         require(
             storefronts[products[_sku].storefrontId].storeOwner == msg.sender
         );
@@ -239,7 +242,10 @@ contract Marketplace is Administrable, EmergencyStoppable {
      * @param _sku the SKU of the product to update
      * @param count the new count of the product
      */
-    function updateProductCount(uint _sku, uint count) public onlyActiveOwner {
+    function updateProductCount(uint _sku, uint count)
+        external
+        onlyActiveOwner
+    {
         require(
             storefronts[products[_sku].storefrontId].storeOwner == msg.sender
         );
@@ -254,7 +260,7 @@ contract Marketplace is Administrable, EmergencyStoppable {
      * @param quantity the desired amount of the product
      */
     function buyProduct(uint _sku, uint quantity)
-        public
+        external
         payable
         stopInEmergency
     {
@@ -278,7 +284,7 @@ contract Marketplace is Administrable, EmergencyStoppable {
      * Get the balance of the sender (it has to be a store owner)
      * @return the balance of the sender
      */
-    function balance() public view onlyActiveOwner returns(uint) {
+    function balance() external view onlyActiveOwner returns(uint) {
         return balances[msg.sender];
     }
 
@@ -286,7 +292,7 @@ contract Marketplace is Administrable, EmergencyStoppable {
      * Withdraw an amount of ether from it's balance (it has to be a store owner)
      * @param amount the amount of ether in Wei to withdraw
      */
-    function withdraw(uint amount) public onlyActiveOwner stopInEmergency {
+    function withdraw(uint amount) external onlyActiveOwner stopInEmergency {
         require(
             amount <= balances[msg.sender],
             "You dont have enough founds to perform this operation"
