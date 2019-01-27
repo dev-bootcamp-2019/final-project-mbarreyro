@@ -3,7 +3,7 @@ var Administrable = artifacts.require("./Administrable.sol");
 var EmergencyStoppable = artifacts.require("./EmergencyStoppable.sol");
 
 module.exports = function(deployer, network, accounts) {
-  const admins = [accounts[0], accounts[1]];
+  const admins = [accounts[0]];
 
   deployer.deploy(Marketplace, admins);
   deployer.deploy(Administrable, admins);
