@@ -119,7 +119,7 @@ contract("Marketplace", accounts => {
     try {
         await marketplaceInstance.updateProductPrice(freezerId, 23232, { from: storeOwner2 });
     } catch (e) {
-      failed = true;
+        failed = true;
     }
 
     assert.equal(failed, true, "trying to update a product from a different account than store owner should fail");
