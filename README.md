@@ -6,6 +6,15 @@ This application allows store owners (registered by admin accounts) add differen
 Any user (without being an account registered in this Marketplace) can browse storefronts and buy their products.
 Storefront owners that have sold products in this Marketplace can withdraw any founds gathered from these operations.
 
+# Rinkeby Testnet
+
+Contracts built in repo have address to Rinkeby deployed Marketplace contract.
+If you run client locally (just doing `npm install` and `npm start` in client directory) you sould be able to
+connect to development server using your Rinkeby account.
+
+Project was also deployed to https://ipfs.infura.io/ipfs/QmdsSiCN9kP7u7A4Aa3ZqpQmcSMXx588hZYUkYTW9x6VJX/
+Please contact me if it doesn't work for you.
+
 ## Setting up
 
 This application is based in truffle box [react](https://truffleframework.com/boxes/react).
